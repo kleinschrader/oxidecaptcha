@@ -1,0 +1,253 @@
+openapi: '3.0.3'
+info:
+  title: oxitecaptcha API
+  description: |
+    This is the openapi definiton of the oxitecaptcha API, the idea behind oxitecaptcha is to provide
+    customers the ability to provide a computational challenge that makes it expensive for bots to repeatitly
+    use a function of an application.
+
+    What this api aims to do:
+    - Make it expensive for bad actors to spam you by giving them a computational challenge.
+    - Give you an easy endpoint to secure your applications
+
+    What this does NOT aim to do:
+    - Definitly prove that a user of your application is human.
+  version: '0.1.0'
+security:
+  - ApiKeyAuth: []
+components:
+  schemas:
+    error:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          enum:
+            - MissingApiKey
+            - WrongApiKey
+            - SiteNotFound
+            - ChallengeNotFound
+            - SolutionWrongSize
+        context:
+          type: string
+          description: A more comprehensive description of the error
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: api-key
+  parameters:
+    siteId:
+      in: path
+      name: siteId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: The siteId of the resource you are trying to protect.
+    challengeId:
+      in: path
+      name: challengeId
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: The id of the challenge
+  responses:
+    '403':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error"
+          examples:
+            missingApiKey:
+              summary: Missing Api Key
+              value:
+                id: MissingApiKey
+                context: Missing API Key
+            wrongApiKey:
+              summary: Wrong Api Key
+              value:
+                id: WrongApiKey
+                context: Wrong API Key
+        
+paths:
+  /site/{siteId}/challenge:
+    get:
+      description: Create and get new challenge.
+      security: []      
+      parameters:
+        - $ref: "#/components/parameters/siteId"
+      responses:
+        '200':
+          description: Challenge created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - prefixes
+                  - difficulty
+                  - challegesToSolve
+                  - expiresAt
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: 3bf31cde-7b19-4569-86b8-b08f713231f5
+                    description: The id of the challenge
+                  prefixes:
+                    type: array
+                    description: An array of base64 encoded prefixes to find solutions for
+                    items:
+                      type: string
+                      format: base64
+                    example:
+                      - CLtLQa/oTMmw4stWIVmaOchmdN0=
+                      - isYXaHQV7kxO+ZKO93lzD0t5rlk=
+                      - EwYekE1oo7TmWDvbQgYWigFM1t4=
+                  difficulty:
+                    type: integer
+                    description: The number of leading bits of zeros the has to have
+                    example: 18
+                  challegesToSolve:
+                    type: integer
+                    description: The number of prefixes to find a solution to for this challenge to be considered solved.
+                    example: 2
+                  solutionLength:
+                    type: integer
+                    description: The lenght in bytes the solution should be
+                    example: 8
+                  expiresAt:
+                    type: integer
+                    format: u64
+                    description: A unix timestamp on when this challange will expire.
+                    example: 1727455242
+        '404':
+          description: Site not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+              examples:
+                siteNotFound:
+                  summary: Site not found
+                  value:
+                    id: SiteNotFound
+                    context: Site not found
+  /site/{siteId}/challenge/{challengeId}:
+    delete:
+      description: Delete a specific challenge
+      parameters:
+        - $ref: "#/components/parameters/siteId"
+        - $ref: "#/components/parameters/challengeId"
+      responses:
+        '200':
+          description: OK
+        '403':
+          $ref: "#/components/responses/403"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                siteNotFound:
+                  summary: Site Not found
+                  value:
+                    id: SiteNotFound
+                    context: Site not found
+                challengeNotFound:
+                  summary: Challenge not found
+                  value:
+                    id: ChallengeNotFound
+                    context: Challenge not found
+  /site/{siteId}/challenge/{challengeId}/validate:
+    post:
+      description: |
+        Validate the solution of a challenge.
+        You should only considered the challange solved when you get back a 200 with valid true
+
+        You can only validate a challenge once as afterwards it gets deleted
+      parameters:
+        - $ref: "#/components/parameters/siteId"
+        - $ref: "#/components/parameters/challengeId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                solutions:
+                  type: array
+                  items:
+                    type: string
+                    format: base64
+                    nullable: true
+            examples:
+              exampleSolution:
+                summary: Example Solution
+                value:
+                  solutions:
+                    - GLobAiXADSw=
+                    - null
+                    - MWS+FyffgpA=
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    description: Wether the solution is valid
+                    type: boolean
+              examples:
+                valid:
+                  summary: Valid Response
+                  value:
+                    valid: true
+                notValid:
+                  summary: Invalid Response
+                  value:
+                    valid: false
+        '400':
+          description: |
+            A Solution is the wrong size.
+
+            They should always be the size the client got from the setup route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                solutionWrongSize:
+                  summary: Solution has wrong size
+                  value:
+                    id: SolutionWrongSize
+                    context: Solution[2] is the wrong size
+        '403':
+          $ref: "#/components/responses/403"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                siteNotFound:
+                  summary: Site Not found
+                  value:
+                    id: SiteNotFound
+                    context: Site not found
+                challengeNotFound:
+                  summary: Challenge not found
+                  value:
+                    id: ChallengeNotFound
+                    context: Challenge not found

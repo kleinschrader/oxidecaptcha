@@ -1,0 +1,60 @@
+use bytes::{BufMut, Bytes, BytesMut};
+use serde::Serialize;
+use base64::prelude::*;
+
+use rand::{thread_rng, Rng};
+
+#[derive(Debug, Clone)]
+pub struct Prefix(Bytes);
+
+impl Serialize for Prefix {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+            let encoded = BASE64_STANDARD.encode(&self.0);
+
+            serializer.serialize_str(&encoded)
+    }
+}
+
+impl Prefix {
+    pub fn generate(size: usize) -> Self {
+        let mut bytes = BytesMut::with_capacity(size);
+
+        let mut rng = thread_rng();
+
+        (0..size).into_iter()
+            .map(|_| rng.gen::<u8>())
+            .for_each(|d| bytes.put_u8(d));
+
+        Prefix(bytes.into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use bytes::Bytes;
+    use serde_json::json;
+
+    use super::Prefix;
+
+    #[test]
+    fn test_generate() {
+        let prefix = Prefix::generate(8);
+
+        assert_eq!(
+            prefix.0.len(),
+            8
+        )
+    }
+
+    #[test]
+    fn test_serialize() {
+        let data = Bytes::from_static(&[12,14,43,50,90]);
+        let prefix = Prefix(data);
+
+        let json = json!({"value": prefix}).to_string();
+
+        assert_eq!(json, r#"{"value":"DA4rMlo="}"#)
+    }
+}
