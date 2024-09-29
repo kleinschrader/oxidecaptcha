@@ -1,38 +1,87 @@
+use std::time::SystemTime;
+
 use serde::{ser::SerializeStruct, Serialize};
 use timestamp::Timestamp;
 use uuid::Uuid;
 pub use prefix::Prefix;
+
+use crate::site::Site;
 
 
 mod prefix;
 mod timestamp;
 
 #[derive(Debug, Clone)]
-pub struct Challenge {
+pub struct Challenge<'site, T: Clone> {
     id: Uuid,
     prefixes: Vec<Prefix>,
-    difficulty: u8,
-    challenges_to_solve: usize,
-    solution_length: usize,
-    expires_at: Timestamp
+    expires_at: Timestamp,
+    site: &'site T
 }
 
-impl Challenge {
+impl<'site> Challenge<'site, Site> {
+    pub fn generate(
+        site: &'site Site,
+    ) -> Self {
+        let id = Uuid::new_v4();
+
+        let prefixes = (0..site.get_prefix_count())
+            .map(|_| Prefix::generate(site.get_prefix_length()))
+            .collect();
+
+        let expires_at = SystemTime::now();
+        let expires_at = expires_at + *site.get_lifetime();
+        let expires_at = expires_at.into();
+        Challenge {
+            id,
+            prefixes,
+            expires_at,
+            site
+        }
+
+    }
+
+
+}
+
+impl<'site, T: Clone> Challenge<'site, T> {
     pub fn get_id(&self) -> &Uuid {
         &self.id
     }
 }
 
-impl Serialize for Challenge {
+impl<'site> Challenge<'site, Site> {
+    pub fn pluck(self) -> Challenge<'static, ()> {
+        Challenge {
+            id: self.id,
+            prefixes: self.prefixes,
+            expires_at: self.expires_at,
+            site: &()
+        }
+    }
+}
+
+impl<'site> Challenge<'static, ()> {
+    pub fn unpluck(self, site: &'site Site) -> Challenge<'site, Site> {
+        Challenge {
+            id: self.id,
+            prefixes: self.prefixes,
+            expires_at: self.expires_at,
+            site
+        }
+    }
+}
+
+impl<'site> Serialize for Challenge<'site, Site> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer {
         let mut state = serializer.serialize_struct("Challenge", 6)?;
         state.serialize_field("id", &self.id)?;
         state.serialize_field("prefixes", &self.prefixes)?;
-        state.serialize_field("difficulty", &self.difficulty)?;
-        state.serialize_field("challegesToSolve", &self.challenges_to_solve)?;
-        state.serialize_field("solutionLength", &self.solution_length)?;
+        state.serialize_field("difficulty", &self.site.get_difficulty())?;
+        state.serialize_field("challegesToSolve", &self.site.get_prefixes_to_solve())?;
+        state.serialize_field("solutionLength", &self.site.get_prefix_length())?;
         state.serialize_field("expiresAt", &self.expires_at)?;
         state.end()
     }

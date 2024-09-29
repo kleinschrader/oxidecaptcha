@@ -4,9 +4,8 @@ use uuid::Uuid;
 
 use crate::{challenge::Challenge, site::Site};
 
-mod memory;
-
-pub use memory::MemoryStorage;
+mod storageprovider;
+pub use storageprovider::StorageProvider;
 
 #[derive(Debug)]
 pub struct SiteNotFoundError {}
@@ -19,11 +18,10 @@ impl Display for SiteNotFoundError {
 
 impl Error for SiteNotFoundError {}
 
-
 pub trait Storage {
     async fn get_site(&self, id: &Uuid) -> Option<Site>;
 
-    async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge>;
+    async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge<'static, ()>>;
 
-    async fn store_challenge(&mut self, site: &Site, challenge: Challenge) -> Result<(), SiteNotFoundError>;
+    async fn store_challenge(&mut self, site: &Site, challenge: Challenge<'static, ()>) -> Result<(), SiteNotFoundError>;
 }

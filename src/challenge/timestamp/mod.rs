@@ -5,6 +5,12 @@ use serde::Serialize;
 #[derive(Debug, Clone)]
 pub struct Timestamp(SystemTime);
 
+impl From<SystemTime> for Timestamp {
+    fn from(value: SystemTime) -> Self {
+        Timestamp(value)
+    }
+}
+
 impl From<u64> for Timestamp {
     fn from(value: u64) -> Self {
         let duration = Duration::from_secs(value);

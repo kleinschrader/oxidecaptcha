@@ -12,7 +12,7 @@ impl<'de> Deserialize<'de> for Site {
     where
         D: Deserializer<'de>,
     {
-        enum Field { Id, ApiKey, Prefixes, Difficulty, SolutionLength, Lifetime }
+        enum Field { Id, ApiKey, Prefixes, PrefixesToSolve, PrefixLength, Difficulty, SolutionLength, Lifetime }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -37,6 +37,8 @@ impl<'de> Deserialize<'de> for Site {
                             "apiKey" => Ok(Field::ApiKey),
                             "difficulty" => Ok(Field::Difficulty),
                             "prefixes" => Ok(Field::Prefixes),
+                            "prefixesToSolve" => Ok(Field::PrefixesToSolve),
+                            "prefixLength" => Ok(Field::PrefixLength),
                             "solutionLength" => Ok(Field::SolutionLength),
                             "lifetime" => Ok(Field::Lifetime),
                             _ => Err(de::Error::unknown_field(value, FIELDS)),
@@ -65,6 +67,8 @@ impl<'de> Deserialize<'de> for Site {
                 let mut api_key = None;
                 let mut difficulty = None;
                 let mut prefixes = None;
+                let mut prefixes_to_solve = None;
+                let mut prefix_length = None;
                 let mut solution_length = None;
                 let mut lifetime = None;
                 while let Some(key) = map.next_key()? {
@@ -93,6 +97,20 @@ impl<'de> Deserialize<'de> for Site {
                             }
                             prefixes = Some(map.next_value()?);
                         },
+                        Field::PrefixLength => {
+                            if prefix_length.is_some() {
+                                return Err(de::Error::duplicate_field("prefixLength"));
+                            }
+
+                            prefix_length = Some(map.next_value()?);
+                        },
+                        Field::PrefixesToSolve => {
+                            if prefixes_to_solve.is_some() {
+                                return Err(de::Error::duplicate_field("prefixesToSolve"));
+                            }
+
+                            prefixes_to_solve = Some(map.next_value()?);
+                        }
                         Field::SolutionLength => {
                             if solution_length.is_some() {
                                 return Err(de::Error::duplicate_field("solutionLength"));
@@ -111,16 +129,27 @@ impl<'de> Deserialize<'de> for Site {
                 let api_key = api_key.ok_or_else(|| de::Error::missing_field("apiKey"))?;
                 let difficulty = difficulty.ok_or_else(|| de::Error::missing_field("difficulty"))?;
                 let prefixes = prefixes.ok_or_else(|| de::Error::missing_field("prefixes"))?;
+                let prefix_length = prefix_length.ok_or_else(|| de::Error::missing_field("prefix_length"))?;
+                let prefixes_to_solve = prefixes_to_solve.ok_or_else(|| de::Error::missing_field("prefixesToSolve"))?;
                 let solution_length = solution_length.ok_or_else(|| de::Error::missing_field("solutionLength"))?;
                 let lifetime: Lifetime = lifetime.ok_or_else(|| de::Error::missing_field("lifetime"))?;
 
                
 
-                Ok(Site::new(id, api_key, prefixes, difficulty, solution_length, lifetime.into()))
+                Ok(Site::new(
+                    id,
+                    api_key,
+                    prefixes,
+                    prefix_length,
+                    prefixes_to_solve,
+                    difficulty,
+                    solution_length,
+                    lifetime.into()
+                ))
             }
         }
 
-        const FIELDS: &[&str] = &["secs", "nanos"];
+        const FIELDS: &[&str] = &["`id`", "`apiKey`", "`prefixes`", "`prefixes_to_solve`", "`difficulty`", "`solutionLength`", "`lifetime`"];
         deserializer.deserialize_struct("Duration", FIELDS, SiteVisitor)
     }
 }
