@@ -1,26 +1,44 @@
+use std::process::exit;
+
+use application::Application;
 use storage::Storage;
+use tokio::net::TcpListener;
+use tracing::{error, info};
 use uuid::uuid;
+use state::State;
 
 mod challenge;
 mod config;
 mod site;
 mod storage;
+mod routes;
+mod application;
+mod state;
+mod errorResponse;
+mod middleware;
 
 #[tokio::main]
 async fn main() {
-    let config = std::fs::read_to_string("config.json")
-        .expect("Unable to load config.json");
-    let config: config::Config = serde_json::from_str(&config)
-        .expect("Unable to parse config");
+    let _ = tracing_subscriber::fmt().init();
+    
+    let application = match Application::new().await {
+        Ok(app) => app,
+        Err(e) => {
+            error!("App couldnt start: {:?}", e);
+            exit(1);
+        }
+    };
 
-    let storage = storage::StorageProvider::new(&config);
+    match application.run().await {
+        Ok(_) => (),
+        Err(e) => {
+            error!("App crashed: {:?}", e);
+            exit(1);
+        }
+    }
 
-    let site = storage.get_site(&uuid!("e169138a-44bc-4685-89ac-827f62e6d070")).await.unwrap();
-
-    let challenge = site.generate_challenge();
-    let challenge = challenge.pluck();
-    let challenge = challenge.unpluck(&site);
+    //let storage = storage::StorageProvider::new(&config);
 
 
-    println!("{}", serde_json::to_string(&challenge).unwrap());
+
 }

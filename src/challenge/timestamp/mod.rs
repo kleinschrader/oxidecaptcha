@@ -36,6 +36,13 @@ impl From<&Timestamp> for u64 {
     }
 }
 
+impl Timestamp {
+    pub fn is_expired(&self) -> bool {
+        let now = SystemTime::now();
+        self.0 < now
+    }
+}
+
 impl Serialize for Timestamp {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

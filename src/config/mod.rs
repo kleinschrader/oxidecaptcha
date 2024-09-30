@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{net::{IpAddr, SocketAddr}, time::Duration};
 
 mod inmemoryconfig;
 
@@ -13,11 +13,17 @@ pub enum StorageTypeConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    #[serde(rename = "listenSocket")]
+    listen_socket: SocketAddr,
     storage: StorageTypeConfig
 }
 
 impl Config {
     pub fn get_storage(&self) -> &StorageTypeConfig {
         &self.storage
+    }
+
+    pub fn get_listen_socket(&self) -> &SocketAddr {
+        &self.listen_socket
     }
 }

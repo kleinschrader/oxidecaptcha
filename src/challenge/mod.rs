@@ -1,12 +1,14 @@
 use std::time::SystemTime;
 
+use axum::response::{IntoResponse, Response};
 use serde::{ser::SerializeStruct, Serialize};
 use timestamp::Timestamp;
 use uuid::Uuid;
+use anyhow::Result;
+
 pub use prefix::Prefix;
 
 use crate::site::Site;
-
 
 mod prefix;
 mod timestamp;
@@ -70,6 +72,10 @@ impl<'site> Challenge<'static, ()> {
             site
         }
     }
+
+    pub fn is_expired(&self) -> bool {
+        self.expires_at.is_expired()
+    }
 }
 
 impl<'site> Serialize for Challenge<'site, Site> {
@@ -84,5 +90,18 @@ impl<'site> Serialize for Challenge<'site, Site> {
         state.serialize_field("solutionLength", &self.site.get_prefix_length())?;
         state.serialize_field("expiresAt", &self.expires_at)?;
         state.end()
+    }
+}
+
+impl<'site> IntoResponse for Challenge<'site, Site> {
+    fn into_response(self) -> Response {
+        let body = serde_json::to_string(&self)
+            .expect("Unable to serialize boyd")
+            .into();
+
+        Response::builder()
+            .header("Content-Type", "application/json")
+            .body(body)
+            .expect("Unable ot create body")
     }
 }
