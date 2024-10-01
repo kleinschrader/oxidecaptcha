@@ -8,20 +8,30 @@ mod storageprovider;
 pub use storageprovider::StorageProvider;
 
 #[derive(Debug)]
-pub struct SiteNotFoundError {}
+pub enum StorageError {
+    SiteNotFoundError,
+    ChallengeNotFound
+}
 
-impl Display for SiteNotFoundError {
+impl Display for StorageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Unable to find site")
+        let error = match &self {
+            StorageError::SiteNotFoundError => "Site not found",
+            StorageError::ChallengeNotFound => "Challenge not found",
+        };
+
+        f.write_str(&error)
     }
 }
 
-impl Error for SiteNotFoundError {}
+impl Error for StorageError {}
 
-pub trait Storage {
+pub trait Storage: Send + Sync {
     async fn get_site(&self, id: &Uuid) -> Option<Site>;
 
     async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge<'static, ()>>;
 
-    async fn store_challenge(&mut self, site: &Site, challenge: Challenge<'static, ()>) -> Result<(), SiteNotFoundError>;
+    async fn store_challenge(&self, site: &Site, challenge: &Challenge<'static, ()>) -> Result<(), StorageError>;
+
+    async fn delete_challenge(&self, site: &Site, challenge: &Challenge<'static, ()>) -> Result<(), StorageError>;
 }

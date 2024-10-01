@@ -66,6 +66,10 @@ impl Site {
         self.prefixes_to_solve
     }
 
+    pub fn get_solution_length(&self) -> usize {
+        self.solution_length
+    }
+
     pub fn get_difficulty(&self) -> u8 {
         self.difficulty
     }

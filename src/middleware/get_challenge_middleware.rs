@@ -1,6 +1,6 @@
-use axum::{extract::{Path, Request, State}, middleware::Next, response::Response, Extension};
+use axum::{extract::{Path, Request, State}, middleware::Next, response::Response};
 
-use crate::{challenge::Challenge, errorResponse::{ErrorId, ErrorResponse}, site::Site, storage::Storage};
+use crate::{errorResponse::{ErrorId, ErrorResponse}, storage::Storage};
 
 pub async fn get_challenge_middleware(
     State(state): State<crate::state::State>,
@@ -24,8 +24,6 @@ pub async fn get_challenge_middleware(
         .get_challange(&challenge_id, &site)
         .await
         .ok_or(ErrorResponse::new(ErrorId::ChallangeNotFound, "Challenge not Found"))?;
-
-    std::mem::drop(storage);
 
     request.extensions_mut().insert(site);
     request.extensions_mut().insert(challenge);

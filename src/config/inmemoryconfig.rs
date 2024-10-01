@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::site::Site;
 

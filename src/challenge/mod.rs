@@ -87,7 +87,7 @@ impl<'site> Serialize for Challenge<'site, Site> {
         state.serialize_field("prefixes", &self.prefixes)?;
         state.serialize_field("difficulty", &self.site.get_difficulty())?;
         state.serialize_field("challegesToSolve", &self.site.get_prefixes_to_solve())?;
-        state.serialize_field("solutionLength", &self.site.get_prefix_length())?;
+        state.serialize_field("solutionLength", &self.site.get_solution_length())?;
         state.serialize_field("expiresAt", &self.expires_at)?;
         state.end()
     }
