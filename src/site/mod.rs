@@ -34,7 +34,7 @@ impl Site {
     ) -> Self {
         let mut hasher = Sha256::new();
         hasher
-            .write_all(&api_key.as_bytes())
+            .write_all(api_key.as_bytes())
             .expect("Unable to hash api_key");
         let api_key_hash = hasher.finalize();
         let api_key_hash = api_key_hash.to_vec();

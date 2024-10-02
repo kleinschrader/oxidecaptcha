@@ -17,7 +17,7 @@ mod storage;
 
 #[tokio::main]
 async fn main() {
-    let _ = tracing_subscriber::fmt().init();
+    tracing_subscriber::fmt().init();
 
     let application = match Application::new().await {
         Ok(app) => app,

@@ -20,7 +20,7 @@ impl Display for StorageError {
             StorageError::ChallengeNotFound => "Challenge not found",
         };
 
-        f.write_str(&error)
+        f.write_str(error)
     }
 }
 

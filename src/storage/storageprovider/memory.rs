@@ -27,14 +27,14 @@ struct MemoryStorageInner {
 
 impl MemoryStorage {
     pub fn new(
-        sites: &Vec<Site>,
+        sites: &[Site],
         housekeeping_interval: Duration,
         housekeeping_batch_size: usize,
     ) -> Self {
         let challanges = IndexMap::new();
 
         let sites: BTreeMap<Uuid, Site> = sites
-            .into_iter()
+            .iter()
             .map(|s| (s.get_id().to_owned(), s.to_owned()))
             .collect();
 
@@ -50,13 +50,13 @@ impl MemoryStorage {
             let storage = storage_for_handle;
             let housekeeping_batch_size = housekeeping_batch_size;
             loop {
-                tokio::time::sleep(housekeeping_interval.clone()).await;
+                tokio::time::sleep(housekeeping_interval).await;
 
                 let locktime = Instant::now();
 
                 let mut lock = storage.lock().await;
 
-                let mut os_gen = rand::rngs::OsRng::default();
+                let mut os_gen = rand::rngs::OsRng;
 
                 let len = lock.challanges.len();
 
@@ -65,9 +65,8 @@ impl MemoryStorage {
                 }
 
                 let indicies_to_remove: Vec<usize> = (0..housekeeping_batch_size)
-                    .into_iter()
                     .map(|_| os_gen.gen_range(0..len))
-                    .filter(|i| lock.challanges[i.clone()].is_expired())
+                    .filter(|i| lock.challanges[*i].is_expired())
                     .collect();
 
                 let indicies_to_remove_count = indicies_to_remove.len();
