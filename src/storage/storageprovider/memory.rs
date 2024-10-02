@@ -14,29 +14,31 @@ use crate::{challenge::Challenge, site::Site};
 use crate::storage::{Storage, StorageError};
 
 #[derive(Debug, Clone)]
-pub struct MemoryStorage{
+pub struct MemoryStorage {
     inner: Arc<Mutex<MemoryStorageInner>>,
-    _housekeeper: Arc<JoinHandle<()>>
+    _housekeeper: Arc<JoinHandle<()>>,
 }
 
 #[derive(Debug)]
 struct MemoryStorageInner {
     sites: BTreeMap<Uuid, Site>,
-    challanges: IndexMap<(Uuid, Uuid), Challenge<'static, ()>>, 
+    challanges: IndexMap<(Uuid, Uuid), Challenge<'static, ()>>,
 }
 
 impl MemoryStorage {
-    pub fn new(sites: &Vec<Site>, housekeeping_interval: Duration, housekeeping_batch_size: usize) -> Self {
+    pub fn new(
+        sites: &Vec<Site>,
+        housekeeping_interval: Duration,
+        housekeeping_batch_size: usize,
+    ) -> Self {
         let challanges = IndexMap::new();
 
-        let sites: BTreeMap<Uuid, Site> = sites.into_iter()
+        let sites: BTreeMap<Uuid, Site> = sites
+            .into_iter()
             .map(|s| (s.get_id().to_owned(), s.to_owned()))
             .collect();
 
-        let storage = MemoryStorageInner {
-            challanges,
-            sites
-        };
+        let storage = MemoryStorageInner { challanges, sites };
 
         let storage = Mutex::new(storage);
         let storage = Arc::new(storage);
@@ -48,7 +50,6 @@ impl MemoryStorage {
             let storage = storage_for_handle;
             let housekeeping_batch_size = housekeeping_batch_size;
             loop {
-
                 tokio::time::sleep(housekeeping_interval.clone()).await;
 
                 let locktime = Instant::now();
@@ -70,21 +71,22 @@ impl MemoryStorage {
                     .collect();
 
                 let indicies_to_remove_count = indicies_to_remove.len();
-                    
+
                 for index in indicies_to_remove {
                     lock.challanges.swap_remove_index(index);
                 }
 
                 if indicies_to_remove_count > 0 {
                     let duration = locktime.elapsed().as_micros();
-                    info!("Housekeeping task removed {} entries in {}us", indicies_to_remove_count, duration);
+                    info!(
+                        "Housekeeping task removed {} entries in {}us",
+                        indicies_to_remove_count, duration
+                    );
                 }
             }
         });
 
         let handle = Arc::new(handle);
-
-
 
         Self {
             inner: storage,
@@ -105,13 +107,17 @@ impl Storage for MemoryStorage {
         self.inner.lock().await.challanges.get(&key).cloned()
     }
 
-    async fn store_challenge(&self, site: &Site, challenge: &Challenge<'static, ()>) -> Result<(), StorageError> {
+    async fn store_challenge(
+        &self,
+        site: &Site,
+        challenge: &Challenge<'static, ()>,
+    ) -> Result<(), StorageError> {
         let site_id = site.get_id();
         let challange_id = challenge.get_id();
 
         let mut lock = self.inner.lock().await;
         if !lock.sites.contains_key(site_id) {
-            return Err(StorageError::SiteNotFoundError)
+            return Err(StorageError::SiteNotFoundError);
         };
 
         let key = (site_id.to_owned(), challange_id.to_owned());
@@ -120,8 +126,12 @@ impl Storage for MemoryStorage {
 
         Ok(())
     }
-    
-    async fn delete_challenge(&self, site: &Site, challenge: &Challenge<'static, ()>) -> Result<(), StorageError> {
+
+    async fn delete_challenge(
+        &self,
+        site: &Site,
+        challenge: &Challenge<'static, ()>,
+    ) -> Result<(), StorageError> {
         let site_id = site.get_id();
         let challenge_id = challenge.get_id();
 
@@ -129,7 +139,8 @@ impl Storage for MemoryStorage {
 
         let mut lock = self.inner.lock().await;
 
-        lock.challanges.remove(&key)
+        lock.challanges
+            .swap_remove(&key)
             .map(|_| ())
             .ok_or(StorageError::ChallengeNotFound)
     }

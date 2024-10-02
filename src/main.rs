@@ -3,7 +3,7 @@ use std::process::exit;
 use application::Application;
 use state::State;
 use storage::Storage;
-use tracing::{error, info};
+use tracing::error;
 
 mod application;
 mod challenge;

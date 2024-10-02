@@ -1,10 +1,13 @@
 use std::{fmt, time::Duration};
 
-use serde::{de::{self, MapAccess, Visitor}, Deserialize, Deserializer};
+use serde::{
+    de::{self, MapAccess, Visitor},
+    Deserialize, Deserializer,
+};
 
 #[derive(Debug)]
 pub struct Lifetime {
-    inner: Duration
+    inner: Duration,
 }
 
 impl From<Lifetime> for Duration {
@@ -18,7 +21,10 @@ impl<'de> Deserialize<'de> for Lifetime {
     where
         D: Deserializer<'de>,
     {
-        enum Field { Seconds, Minutes }
+        enum Field {
+            Seconds,
+            Minutes,
+        }
 
         // This part could also be generated independently by:
         //
@@ -110,10 +116,7 @@ mod test {
 
         let lifetime: Lifetime = serde_json::from_str(testee).expect("Unable to parse test case");
 
-        assert_eq!(
-            lifetime.inner,
-            Duration::from_secs(32)
-        )
+        assert_eq!(lifetime.inner, Duration::from_secs(32))
     }
 
     #[test]
@@ -122,10 +125,7 @@ mod test {
 
         let lifetime: Lifetime = serde_json::from_str(testee).expect("Unable to parse test case");
 
-        assert_eq!(
-            lifetime.inner,
-            Duration::from_secs(120)
-        )
+        assert_eq!(lifetime.inner, Duration::from_secs(120))
     }
 
     #[test]

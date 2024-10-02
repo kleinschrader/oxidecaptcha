@@ -1,6 +1,6 @@
+use base64::prelude::*;
 use bytes::{BufMut, Bytes, BytesMut};
 use serde::Serialize;
-use base64::prelude::*;
 
 use rand::{thread_rng, Rng};
 
@@ -10,10 +10,11 @@ pub struct Prefix(Bytes);
 impl Serialize for Prefix {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
-            let encoded = BASE64_STANDARD.encode(&self.0);
+        S: serde::Serializer,
+    {
+        let encoded = BASE64_STANDARD.encode(&self.0);
 
-            serializer.serialize_str(&encoded)
+        serializer.serialize_str(&encoded)
     }
 }
 
@@ -23,7 +24,7 @@ impl Prefix {
 
         let mut rng = thread_rng();
 
-        (0..size).into_iter()
+        (0..size)
             .map(|_| rng.gen::<u8>())
             .for_each(|d| bytes.put_u8(d));
 
@@ -42,15 +43,12 @@ mod tests {
     fn test_generate() {
         let prefix = Prefix::generate(8);
 
-        assert_eq!(
-            prefix.0.len(),
-            8
-        )
+        assert_eq!(prefix.0.len(), 8)
     }
 
     #[test]
     fn test_serialize() {
-        let data = Bytes::from_static(&[12,14,43,50,90]);
+        let data = Bytes::from_static(&[12, 14, 43, 50, 90]);
         let prefix = Prefix(data);
 
         let json = json!({"value": prefix}).to_string();

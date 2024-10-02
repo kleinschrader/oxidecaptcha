@@ -1,10 +1,10 @@
 use std::time::SystemTime;
 
+use anyhow::Result;
 use axum::response::{IntoResponse, Response};
 use serde::{ser::SerializeStruct, Serialize};
 use timestamp::Timestamp;
 use uuid::Uuid;
-use anyhow::Result;
 
 pub use prefix::Prefix;
 
@@ -18,13 +18,11 @@ pub struct Challenge<'site, T: Clone> {
     id: Uuid,
     prefixes: Vec<Prefix>,
     expires_at: Timestamp,
-    site: &'site T
+    site: &'site T,
 }
 
 impl<'site> Challenge<'site, Site> {
-    pub fn generate(
-        site: &'site Site,
-    ) -> Self {
+    pub fn generate(site: &'site Site) -> Self {
         let id = Uuid::new_v4();
 
         let prefixes = (0..site.get_prefix_count())
@@ -38,12 +36,9 @@ impl<'site> Challenge<'site, Site> {
             id,
             prefixes,
             expires_at,
-            site
+            site,
         }
-
     }
-
-
 }
 
 impl<'site, T: Clone> Challenge<'site, T> {
@@ -58,7 +53,7 @@ impl<'site> Challenge<'site, Site> {
             id: self.id,
             prefixes: self.prefixes,
             expires_at: self.expires_at,
-            site: &()
+            site: &(),
         }
     }
 }
@@ -69,7 +64,7 @@ impl<'site> Challenge<'static, ()> {
             id: self.id,
             prefixes: self.prefixes,
             expires_at: self.expires_at,
-            site
+            site,
         }
     }
 
@@ -81,7 +76,8 @@ impl<'site> Challenge<'static, ()> {
 impl<'site> Serialize for Challenge<'site, Site> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
+        S: serde::Serializer,
+    {
         let mut state = serializer.serialize_struct("Challenge", 6)?;
         state.serialize_field("id", &self.id)?;
         state.serialize_field("prefixes", &self.prefixes)?;

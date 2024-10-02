@@ -1,6 +1,10 @@
 use std::fmt::Display;
 
-use axum::{body::Body, http::{Response, StatusCode}, response::IntoResponse};
+use axum::{
+    body::Body,
+    http::{Response, StatusCode},
+    response::IntoResponse,
+};
 use serde::Serialize;
 
 #[derive(Debug)]
@@ -11,7 +15,7 @@ pub enum ErrorId {
     ChallangeNotFound,
     SolutionWrongSize,
     InternalServerError,
-    Timeout
+    Timeout,
 }
 
 impl From<ErrorId> for StatusCode {
@@ -31,7 +35,8 @@ impl From<ErrorId> for StatusCode {
 impl Serialize for ErrorId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
+        S: serde::Serializer,
+    {
         match self {
             ErrorId::MissingApiKey => serializer.serialize_str("MissingApiKey"),
             ErrorId::WrongApiKey => serializer.serialize_str("WrongApiKey"),
@@ -54,10 +59,7 @@ impl ErrorResponse {
     pub fn new(id: ErrorId, context: impl Display) -> Self {
         let context = context.to_string();
 
-        Self {
-            id,
-            context
-        }
+        Self { id, context }
     }
 }
 

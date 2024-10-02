@@ -2,7 +2,7 @@ use crate::{
     config::Config,
     routes::{delete_challange, get_challange},
     state::State,
-    storage::{self, StorageProvider},
+    storage::StorageProvider,
 };
 use anyhow::{Context, Result};
 use axum::{

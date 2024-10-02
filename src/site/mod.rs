@@ -18,7 +18,7 @@ pub struct Site {
     prefixes_to_solve: usize,
     difficulty: u8,
     solution_length: usize,
-    lifetime: Duration
+    lifetime: Duration,
 }
 
 impl Site {
@@ -30,10 +30,12 @@ impl Site {
         prefixes_to_solve: usize,
         difficulty: u8,
         solution_length: usize,
-        lifetime: Duration
+        lifetime: Duration,
     ) -> Self {
         let mut hasher = Sha256::new();
-        hasher.write_all(&api_key.as_bytes()).expect("Unable to hash api_key");
+        hasher
+            .write_all(&api_key.as_bytes())
+            .expect("Unable to hash api_key");
         let api_key_hash = hasher.finalize();
         let api_key_hash = api_key_hash.to_vec();
 
@@ -46,7 +48,7 @@ impl Site {
             prefixes_to_solve,
             difficulty,
             solution_length,
-            lifetime
+            lifetime,
         }
     }
 
@@ -96,8 +98,7 @@ mod tests {
 
     #[test]
     fn test_deserialize() {
-        let test_string = 
-        r#"
+        let test_string = r#"
             {
                 "id": "60601796-7dc2-4d4f-afae-5728592bba6f",
                 "apiKey": "cool",
@@ -116,13 +117,14 @@ mod tests {
 
         assert_eq!(test.id, uuid!("60601796-7dc2-4d4f-afae-5728592bba6f"));
         assert_eq!(test.api_key, "cool");
-        assert_eq!(test.api_key_hash, hex!("c34045c1a1db8d1b3fca8a692198466952daae07eaf6104b4c87ed3b55b6af1b"));
+        assert_eq!(
+            test.api_key_hash,
+            hex!("c34045c1a1db8d1b3fca8a692198466952daae07eaf6104b4c87ed3b55b6af1b")
+        );
         assert_eq!(test.prefixes, 12);
         assert_eq!(test.prefix_length, 33);
         assert_eq!(test.prefixes_to_solve, 8);
         assert_eq!(test.solution_length, 21);
         assert_eq!(test.lifetime, Duration::from_secs(120));
-
-
     }
 }

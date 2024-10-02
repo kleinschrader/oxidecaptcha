@@ -4,18 +4,17 @@ use crate::site::Site;
 
 #[derive(Debug, Deserialize)]
 pub struct HousekeepingConfig {
-    #[serde(rename= "intervalSeconds")]
+    #[serde(rename = "intervalSeconds")]
     pub interval_seconds: u64,
-    #[serde(rename= "batchSize")]
+    #[serde(rename = "batchSize")]
     pub batch_size: usize,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct InMemoryConfig {
     housekeeping: HousekeepingConfig,
-    sites: Vec<Site>
+    sites: Vec<Site>,
 }
-
 
 impl InMemoryConfig {
     pub fn get_sites(&self) -> &Vec<Site> {

@@ -1,18 +1,29 @@
 use std::fmt;
 
-use serde::{de::{self, MapAccess, Visitor}, Deserialize, Deserializer};
+use serde::{
+    de::{self, MapAccess, Visitor},
+    Deserialize, Deserializer,
+};
 
 use crate::site::lifetime::Lifetime;
 
 use super::Site;
-
 
 impl<'de> Deserialize<'de> for Site {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        enum Field { Id, ApiKey, Prefixes, PrefixesToSolve, PrefixLength, Difficulty, SolutionLength, Lifetime }
+        enum Field {
+            Id,
+            ApiKey,
+            Prefixes,
+            PrefixesToSolve,
+            PrefixLength,
+            Difficulty,
+            SolutionLength,
+            Lifetime,
+        }
 
         impl<'de> Deserialize<'de> for Field {
             fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
@@ -58,7 +69,7 @@ impl<'de> Deserialize<'de> for Site {
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("struct site")
             }
-            
+
             fn visit_map<V>(self, mut map: V) -> Result<Site, V::Error>
             where
                 V: MapAccess<'de>,
@@ -78,32 +89,32 @@ impl<'de> Deserialize<'de> for Site {
                                 return Err(de::Error::duplicate_field("id"));
                             }
                             id = Some(map.next_value()?);
-                        },
+                        }
                         Field::ApiKey => {
                             if api_key.is_some() {
                                 return Err(de::Error::duplicate_field("apiKey"));
                             }
                             api_key = Some(map.next_value()?);
-                        },
+                        }
                         Field::Difficulty => {
                             if difficulty.is_some() {
                                 return Err(de::Error::duplicate_field("difficulty"));
                             }
                             difficulty = Some(map.next_value()?);
-                        },
+                        }
                         Field::Prefixes => {
                             if prefixes.is_some() {
                                 return Err(de::Error::duplicate_field("prefixes"));
                             }
                             prefixes = Some(map.next_value()?);
-                        },
+                        }
                         Field::PrefixLength => {
                             if prefix_length.is_some() {
                                 return Err(de::Error::duplicate_field("prefixLength"));
                             }
 
                             prefix_length = Some(map.next_value()?);
-                        },
+                        }
                         Field::PrefixesToSolve => {
                             if prefixes_to_solve.is_some() {
                                 return Err(de::Error::duplicate_field("prefixesToSolve"));
@@ -116,25 +127,28 @@ impl<'de> Deserialize<'de> for Site {
                                 return Err(de::Error::duplicate_field("solutionLength"));
                             }
                             solution_length = Some(map.next_value()?);
-                        },
+                        }
                         Field::Lifetime => {
                             if lifetime.is_some() {
                                 return Err(de::Error::duplicate_field("lifetime"));
                             }
                             lifetime = Some(map.next_value()?);
-                        },
+                        }
                     }
                 }
                 let id = id.ok_or_else(|| de::Error::missing_field("id"))?;
                 let api_key = api_key.ok_or_else(|| de::Error::missing_field("apiKey"))?;
-                let difficulty = difficulty.ok_or_else(|| de::Error::missing_field("difficulty"))?;
+                let difficulty =
+                    difficulty.ok_or_else(|| de::Error::missing_field("difficulty"))?;
                 let prefixes = prefixes.ok_or_else(|| de::Error::missing_field("prefixes"))?;
-                let prefix_length = prefix_length.ok_or_else(|| de::Error::missing_field("prefix_length"))?;
-                let prefixes_to_solve = prefixes_to_solve.ok_or_else(|| de::Error::missing_field("prefixesToSolve"))?;
-                let solution_length = solution_length.ok_or_else(|| de::Error::missing_field("solutionLength"))?;
-                let lifetime: Lifetime = lifetime.ok_or_else(|| de::Error::missing_field("lifetime"))?;
-
-               
+                let prefix_length =
+                    prefix_length.ok_or_else(|| de::Error::missing_field("prefix_length"))?;
+                let prefixes_to_solve =
+                    prefixes_to_solve.ok_or_else(|| de::Error::missing_field("prefixesToSolve"))?;
+                let solution_length =
+                    solution_length.ok_or_else(|| de::Error::missing_field("solutionLength"))?;
+                let lifetime: Lifetime =
+                    lifetime.ok_or_else(|| de::Error::missing_field("lifetime"))?;
 
                 Ok(Site::new(
                     id,
@@ -144,12 +158,20 @@ impl<'de> Deserialize<'de> for Site {
                     prefixes_to_solve,
                     difficulty,
                     solution_length,
-                    lifetime.into()
+                    lifetime.into(),
                 ))
             }
         }
 
-        const FIELDS: &[&str] = &["`id`", "`apiKey`", "`prefixes`", "`prefixes_to_solve`", "`difficulty`", "`solutionLength`", "`lifetime`"];
+        const FIELDS: &[&str] = &[
+            "`id`",
+            "`apiKey`",
+            "`prefixes`",
+            "`prefixes_to_solve`",
+            "`difficulty`",
+            "`solutionLength`",
+            "`lifetime`",
+        ];
         deserializer.deserialize_struct("Duration", FIELDS, SiteVisitor)
     }
 }

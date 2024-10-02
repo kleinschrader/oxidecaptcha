@@ -8,14 +8,14 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type")]
 pub enum StorageTypeConfig {
-    Memory(InMemoryConfig)
+    Memory(InMemoryConfig),
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
     #[serde(rename = "listenSocket")]
     listen_socket: SocketAddr,
-    storage: StorageTypeConfig
+    storage: StorageTypeConfig,
 }
 
 impl Config {

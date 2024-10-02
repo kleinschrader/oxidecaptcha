@@ -29,7 +29,8 @@ impl From<Timestamp> for u64 {
 
 impl From<&Timestamp> for u64 {
     fn from(value: &Timestamp) -> Self {
-        value.0
+        value
+            .0
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("Duration since failed")
             .as_secs()
@@ -46,7 +47,8 @@ impl Timestamp {
 impl Serialize for Timestamp {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
+        S: serde::Serializer,
+    {
         serializer.serialize_u64(self.into())
     }
 }
@@ -75,10 +77,7 @@ mod tests {
 
         let testee = Timestamp(sometime);
 
-        assert_eq!(
-            u64::from(testee),
-            12
-        )
+        assert_eq!(u64::from(testee), 12)
     }
 
     #[test]
@@ -89,9 +88,6 @@ mod tests {
 
         let json = serde_json::json! ( {"testee": testee}).to_string();
 
-        assert_eq!(
-            json,
-            r#"{"testee":12}"#
-        )
+        assert_eq!(json, r#"{"testee":12}"#)
     }
 }

@@ -10,7 +10,7 @@ pub use storageprovider::StorageProvider;
 #[derive(Debug)]
 pub enum StorageError {
     SiteNotFoundError,
-    ChallengeNotFound
+    ChallengeNotFound,
 }
 
 impl Display for StorageError {
@@ -31,7 +31,15 @@ pub trait Storage: Send + Sync {
 
     async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge<'static, ()>>;
 
-    async fn store_challenge(&self, site: &Site, challenge: &Challenge<'static, ()>) -> Result<(), StorageError>;
+    async fn store_challenge(
+        &self,
+        site: &Site,
+        challenge: &Challenge<'static, ()>,
+    ) -> Result<(), StorageError>;
 
-    async fn delete_challenge(&self, site: &Site, challenge: &Challenge<'static, ()>) -> Result<(), StorageError>;
+    async fn delete_challenge(
+        &self,
+        site: &Site,
+        challenge: &Challenge<'static, ()>,
+    ) -> Result<(), StorageError>;
 }

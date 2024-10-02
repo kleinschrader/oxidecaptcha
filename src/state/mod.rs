@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-
 use crate::{config::Config, storage::StorageProvider};
 
 #[derive(Debug, Clone)]
@@ -9,16 +8,12 @@ pub struct State(Arc<InnerState>);
 #[derive(Debug)]
 struct InnerState {
     config: Config,
-    storage: StorageProvider
+    storage: StorageProvider,
 }
 
 impl State {
     pub fn new(config: Config, storage: StorageProvider) -> State {
-
-        let inner = InnerState {
-            config,
-            storage
-        };
+        let inner = InnerState { config, storage };
 
         let inner = Arc::new(inner);
 
