@@ -1,26 +1,24 @@
 use std::process::exit;
 
 use application::Application;
-use storage::Storage;
-use tokio::net::TcpListener;
-use tracing::{error, info};
-use uuid::uuid;
 use state::State;
+use storage::Storage;
+use tracing::{error, info};
 
+mod application;
 mod challenge;
 mod config;
-mod site;
-mod storage;
-mod routes;
-mod application;
-mod state;
-mod errorResponse;
+mod error_response;
 mod middleware;
+mod routes;
+mod site;
+mod state;
+mod storage;
 
 #[tokio::main]
 async fn main() {
     let _ = tracing_subscriber::fmt().init();
-    
+
     let application = match Application::new().await {
         Ok(app) => app,
         Err(e) => {
@@ -38,7 +36,4 @@ async fn main() {
     }
 
     //let storage = storage::StorageProvider::new(&config);
-
-
-
 }

@@ -1,16 +1,25 @@
-use axum::{extract::State, response::{IntoResponse, Response}, Extension};
+use axum::{
+    extract::State,
+    response::{IntoResponse, Response},
+    Extension,
+};
 
-use crate::{errorResponse::{ErrorId::SiteNotFound, ErrorResponse}, site::Site, Storage};
+use crate::{
+    error_response::{ErrorId::SiteNotFound, ErrorResponse},
+    site::Site,
+    Storage,
+};
 
 pub async fn get_challange(
     State(state): State<crate::State>,
     Extension(site): Extension<Site>,
-) -> Result<Response,ErrorResponse> {
+) -> Result<Response, ErrorResponse> {
     let challenge = site.generate_challenge();
 
     let challenge = challenge.pluck();
 
-    state.get_storage()
+    state
+        .get_storage()
         .await
         .store_challenge(&site, &challenge)
         .await
