@@ -19,6 +19,10 @@ impl Serialize for Prefix {
 }
 
 impl Prefix {
+    pub fn new(bytes: Bytes) -> Self {
+        Self(bytes)
+    }
+
     pub fn generate(size: usize) -> Self {
         let mut bytes = BytesMut::with_capacity(size);
 
@@ -29,6 +33,10 @@ impl Prefix {
             .for_each(|d| bytes.put_u8(d));
 
         Prefix(bytes.into())
+    }
+
+    pub fn get_bytes(&self) -> &Bytes {
+        &self.0
     }
 }
 

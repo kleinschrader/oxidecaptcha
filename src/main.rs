@@ -14,6 +14,7 @@ mod routes;
 mod site;
 mod state;
 mod storage;
+mod solution;
 
 #[tokio::main]
 async fn main() {
