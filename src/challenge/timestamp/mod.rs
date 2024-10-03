@@ -86,8 +86,26 @@ mod tests {
 
         let testee = Timestamp(sometime);
 
-        let json = serde_json::json! ( {"testee": testee}).to_string();
+        let json = serde_json::json! ({"testee": testee}).to_string();
 
         assert_eq!(json, r#"{"testee":12}"#)
+    }
+
+    #[test]
+    fn test_is_expired() {
+        let sometime = SystemTime::now() + Duration::from_secs(120);
+
+        let testee = Timestamp(sometime);
+
+        assert_eq!(testee.is_expired(), false);
+    }
+
+    #[test]
+    fn test_is_not_expired() {
+        let sometime = SystemTime::now() - Duration::from_secs(120);
+
+        let testee = Timestamp(sometime);
+
+        assert_eq!(testee.is_expired(), true);
     }
 }
