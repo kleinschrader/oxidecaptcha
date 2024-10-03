@@ -43,6 +43,8 @@ impl Application {
 
         let logging_middleware = axum::middleware::from_fn(crate::middleware::logging_middleware);
 
+        let auth_middleware = axum::middleware::from_fn(crate::middleware::auth_middleware);
+
         let site_router = axum::Router::new()
             .route("/site/:siteId/challenge", get(get_challange))
             .route_layer(get_site_middleware.clone())
@@ -53,6 +55,7 @@ impl Application {
                 "/site/:siteId/challenge/:challengeId",
                 delete(delete_challange),
             )
+            .route_layer(auth_middleware)
             .route_layer(get_challenge_middleware)
             .with_state(self.state);
 

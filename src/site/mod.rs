@@ -79,6 +79,14 @@ impl Site {
     pub fn get_lifetime(&self) -> &Duration {
         &self.lifetime
     }
+
+    pub fn get_api_key(&self) -> &str {
+        &self.api_key
+    }
+
+    pub fn get_api_key_hash(&self) -> &Vec<u8> {
+        &self.api_key_hash
+    }
 }
 
 impl<'site> Site {
