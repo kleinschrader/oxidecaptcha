@@ -30,11 +30,10 @@ impl Solution {
         let mask = !(0xFF >> bits_to_scan);
         let last_byte_masked = last_byte & mask;
 
-        if last_byte_masked != 0 {
-            return  false;
-        } 
-
-        return true;
+        match last_byte_masked {
+            0 => true,
+            _ => false,
+        }
     }
 }
 
