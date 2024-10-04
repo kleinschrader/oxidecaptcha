@@ -19,7 +19,7 @@ impl Serialize for Prefix {
 }
 
 impl Prefix {
-    pub fn new(bytes: Bytes) -> Self {
+    pub fn _new(bytes: Bytes) -> Self {
         Self(bytes)
     }
 
@@ -35,7 +35,7 @@ impl Prefix {
         Prefix(bytes.into())
     }
 
-    pub fn get_bytes(&self) -> &Bytes {
+    pub fn _get_bytes(&self) -> &Bytes {
         &self.0
     }
 }

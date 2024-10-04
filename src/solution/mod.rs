@@ -11,7 +11,7 @@ pub struct Solution (Bytes);
 impl Solution {
     pub async fn _validate(&self, prefix: &Prefix, difficulty: u8) -> bool{
         let mut hasher = Sha256::new();
-        hasher.update(prefix.get_bytes());
+        hasher.update(prefix._get_bytes());
         hasher.update(&self.0);
         let bytes = hasher.finalize();
 
@@ -29,10 +29,7 @@ impl Solution {
         let mask = !(0xFF >> bits_to_scan);
         let last_byte_masked = last_byte & mask;
 
-        match last_byte_masked {
-            0 => true,
-            _ => false,
-        }
+        last_byte_masked == 0
     }
 }
 
@@ -77,7 +74,7 @@ mod tests {
     #[ignore]
     fn find_fitting_test() {
         let prefix = bytes::Bytes::from_static(&hex!("12bedfcafb0491a1998f94f4648c494fc384ceec"));
-        let prefix = Prefix::new(prefix);
+        let prefix = Prefix::_new(prefix);
 
         let mut rng = OsRng;
 
