@@ -1,19 +1,18 @@
 use base64::{prelude::BASE64_STANDARD, Engine};
 use bytes::Bytes;
-use serde::Serialize;
+use serde::{de, Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::challenge::Prefix;
 
-pub struct Solution {
-    solution_bytes: Bytes
-}
+#[derive(Debug)]
+pub struct Solution (Bytes);
 
 impl Solution {
-    pub async fn validate(&self, prefix: &Prefix, difficulty: u8) -> bool{
+    pub async fn _validate(&self, prefix: &Prefix, difficulty: u8) -> bool{
         let mut hasher = Sha256::new();
         hasher.update(prefix.get_bytes());
-        hasher.update(&self.solution_bytes);
+        hasher.update(&self.0);
         let bytes = hasher.finalize();
 
         let bytes_to_scan = (difficulty / 8) as usize;
@@ -41,18 +40,34 @@ impl Serialize for Solution {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer {
-        let bytes_b64 = BASE64_STANDARD.encode(&self.solution_bytes);
+        let bytes_b64 = BASE64_STANDARD.encode(&self.0);
 
         serializer.serialize_str(&bytes_b64)
     }
 }
 
+impl<'de> Deserialize<'de> for Solution {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+            let value = String::deserialize(deserializer)?;
+
+            let base_data = BASE64_STANDARD.decode(value)
+                .map_err(|_| de::Error::custom("could not base64 decode solution"))?;
+
+            let bytes = Bytes::from(base_data);
+
+            Ok(Self(bytes))
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use bytes::{BufMut, BytesMut};
+    use bytes::{BufMut, Bytes, BytesMut};
     use futures::executor::block_on;
     use hex_literal::hex;
     use rand::{rngs::OsRng, Rng};
+    use serde::Deserialize;
 
     use crate::challenge::Prefix;
 
@@ -78,9 +93,9 @@ mod tests {
                 .map(|_| rng.gen())
                 .for_each(|b: u8| solution.put_u8(b));
 
-            let solution = Solution{solution_bytes: solution.into()};
+            let solution = Solution(solution.into());
             
-            if block_on(solution.validate(&prefix, difficulty)) {
+            if block_on(solution._validate(&prefix, difficulty)) {
                 _found_solution = Some(solution);
                 break;
             }
@@ -97,12 +112,11 @@ mod tests {
         let prefix = Prefix::new(prefix);
 
         let difficulty = 13;
-        let solution_len = 12;
 
         let solution = bytes::Bytes::from_static(&hex!("d85ae00d155c6ca8edb4838a"));
-        let solution = Solution { solution_bytes: solution };
+        let solution = Solution ( solution );
 
-        assert_eq!(block_on(solution.validate(&prefix, difficulty)), true);
+        assert_eq!(block_on(solution._validate(&prefix, difficulty)), true);
     }
 
     #[test]
@@ -113,8 +127,42 @@ mod tests {
         let difficulty = 13;
 
         let solution = bytes::Bytes::from_static(&hex!("d85ae00e155c6ca8edb4838a"));
-        let solution = Solution { solution_bytes: solution };
+        let solution = Solution ( solution );
 
-        assert_eq!(block_on(solution.validate(&prefix, difficulty)), false);
+        assert_eq!(block_on(solution._validate(&prefix, difficulty)), false);
+    }
+
+    #[test]
+    fn test_deserialize() {
+        let testee = r#"{"solution":"RkZnClxdPgo="}"#;
+
+        #[derive(Debug, Deserialize)]
+        struct TestStruct {
+            solution: Solution
+        }
+
+        let r: TestStruct = serde_json::from_str(&testee)
+            .expect("Unable to parse test string");
+
+        let bytes = Bytes::from_static( &hex!("4646670a5c5d3e0a"));
+
+        assert_eq!(r.solution.0, bytes);
+    }
+
+
+    #[test]
+    fn test_deserialize_not_base64() {
+        let testee = r#"{"_solution":"RkZnCxdPo="}"#;
+
+        #[derive(Debug, Deserialize)]
+        struct TestStruct {
+            _solution: Solution
+        }
+
+        let e = serde_json::from_str::<TestStruct>(&testee)
+            .expect_err("Somehow we were able parse test string")
+            .to_string();
+
+        assert_eq!(e, "could not base64 decode solution at line 1 column 26");
     }
 }
