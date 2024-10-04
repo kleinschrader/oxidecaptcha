@@ -116,7 +116,7 @@ mod tests {
         let solution = bytes::Bytes::from_static(&hex!("d85ae00d155c6ca8edb4838a"));
         let solution = Solution ( solution );
 
-        assert_eq!(block_on(solution._validate(&prefix, difficulty)), true);
+        assert!(block_on(solution._validate(&prefix, difficulty)));
     }
 
     #[test]
@@ -129,7 +129,7 @@ mod tests {
         let solution = bytes::Bytes::from_static(&hex!("d85ae00e155c6ca8edb4838a"));
         let solution = Solution ( solution );
 
-        assert_eq!(block_on(solution._validate(&prefix, difficulty)), false);
+        assert!(!block_on(solution._validate(&prefix, difficulty)));
     }
 
     #[test]
@@ -141,7 +141,7 @@ mod tests {
             solution: Solution
         }
 
-        let r: TestStruct = serde_json::from_str(&testee)
+        let r: TestStruct = serde_json::from_str(testee)
             .expect("Unable to parse test string");
 
         let bytes = Bytes::from_static( &hex!("4646670a5c5d3e0a"));
@@ -159,7 +159,7 @@ mod tests {
             _solution: Solution
         }
 
-        let e = serde_json::from_str::<TestStruct>(&testee)
+        let e = serde_json::from_str::<TestStruct>(testee)
             .expect_err("Somehow we were able parse test string")
             .to_string();
 

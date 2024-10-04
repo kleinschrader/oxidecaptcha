@@ -97,7 +97,7 @@ mod tests {
 
         let testee = Timestamp(sometime);
 
-        assert_eq!(testee.is_expired(), false);
+        assert!(!testee.is_expired());
     }
 
     #[test]
@@ -106,6 +106,6 @@ mod tests {
 
         let testee = Timestamp(sometime);
 
-        assert_eq!(testee.is_expired(), true);
+        assert!(testee.is_expired());
     }
 }
