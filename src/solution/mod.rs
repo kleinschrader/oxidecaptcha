@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn test_valid() {
         let prefix =  bytes::Bytes::from_static(&hex!("12bedfcafb0491a1998f94f4648c494fc384ceec"));
-        let prefix = Prefix::new(prefix);
+        let prefix = Prefix::_new(prefix);
 
         let difficulty = 13;
 
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn test_invalid() {
         let prefix =  bytes::Bytes::from_static(&hex!("12bedfcafb0491a1998f94f4648c494fc384ceec"));
-        let prefix = Prefix::new(prefix);
+        let prefix = Prefix::_new(prefix);
 
         let difficulty = 13;
 
