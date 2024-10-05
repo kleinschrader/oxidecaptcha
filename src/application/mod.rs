@@ -1,12 +1,12 @@
 use crate::{
     config::Config,
-    routes::{delete_challange, get_challange},
+    routes::{delete_challange, get_challange, validate_challenges},
     state::State,
     storage::StorageProvider,
 };
 use anyhow::{Context, Result};
 use axum::{
-    routing::{delete, get},
+    routing::{delete, get, post},
     Router,
 };
 use tokio::net::TcpListener;
@@ -55,6 +55,10 @@ impl Application {
                 "/site/:siteId/challenge/:challengeId",
                 delete(delete_challange),
             )
+            .route(
+                "/site/:siteId/challenge/:challengeId",
+                post(validate_challenges)
+        )
             .route_layer(auth_middleware)
             .route_layer(get_challenge_middleware)
             .with_state(self.state);

@@ -14,6 +14,7 @@ pub enum ErrorId {
     SiteNotFound,
     ChallangeNotFound,
     SolutionWrongSize,
+    WrongNumberOfSolutions,
     InternalServerError,
     Timeout,
 }
@@ -26,6 +27,7 @@ impl From<ErrorId> for StatusCode {
             ErrorId::SiteNotFound => StatusCode::NOT_FOUND,
             ErrorId::ChallangeNotFound => StatusCode::NOT_FOUND,
             ErrorId::SolutionWrongSize => StatusCode::BAD_REQUEST,
+            ErrorId::WrongNumberOfSolutions => StatusCode::BAD_REQUEST,
             ErrorId::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
             ErrorId::Timeout => StatusCode::SERVICE_UNAVAILABLE,
         }
@@ -43,6 +45,7 @@ impl Serialize for ErrorId {
             ErrorId::SiteNotFound => serializer.serialize_str("SiteNotFound"),
             ErrorId::ChallangeNotFound => serializer.serialize_str("ChallengeNotFound"),
             ErrorId::SolutionWrongSize => serializer.serialize_str("SolutionWrongSize"),
+            ErrorId::WrongNumberOfSolutions => serializer.serialize_str("WrongNumberOfSolutions"),
             ErrorId::InternalServerError => serializer.serialize_str("InternalServerError"),
             ErrorId::Timeout => serializer.serialize_str("Timeout"),
         }

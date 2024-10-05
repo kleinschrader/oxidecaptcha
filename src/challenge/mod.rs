@@ -45,6 +45,10 @@ impl<'site, T: Clone> Challenge<'site, T> {
     pub fn get_id(&self) -> &Uuid {
         &self.id
     }
+
+    pub fn get_prefix(&self, n: usize) -> Option<&Prefix> {
+        self.prefixes.get(n)
+    }
 }
 
 impl<'site> Challenge<'site, Site> {
