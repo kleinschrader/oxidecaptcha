@@ -40,4 +40,6 @@ pub trait Storage: Send + Sync {
         &self,
         challenge: &Challenge<'_, Site>,
     ) -> Result<(), StorageError>;
+
+    async fn healthy(&self) -> bool;
 }

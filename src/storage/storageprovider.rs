@@ -51,6 +51,14 @@ impl Storage for StorageProvider {
             }
         }
     }
+
+    async fn healthy(&self) -> bool {
+        match self {
+            StorageProvider::Memory(memory_storage) => {
+                memory_storage.healthy().await
+            },
+        }
+    }
 }
 
 impl StorageProvider {

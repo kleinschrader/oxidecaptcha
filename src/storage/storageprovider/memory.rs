@@ -146,4 +146,10 @@ impl Storage for MemoryStorage {
             .map(|_| ())
             .ok_or(StorageError::ChallengeNotFound)
     }
+    
+    async fn healthy(&self) -> bool {
+        let _lock = self.inner.lock().await;
+
+        return true;
+    }
 }
