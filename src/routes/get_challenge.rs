@@ -16,14 +16,12 @@ pub async fn get_challange(
 ) -> Result<Response, ErrorResponse> {
     let challenge = site.generate_challenge();
 
-    let challenge = challenge.pluck();
-
     state
         .get_storage()
         .await
-        .store_challenge(&site, &challenge)
+        .store_challenge(&challenge)
         .await
         .map_err(|_| ErrorResponse::new(SiteNotFound, "Site not found"))?;
 
-    Ok(challenge.unpluck(&site).into_response())
+    Ok(challenge.into_response())
 }

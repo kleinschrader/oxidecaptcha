@@ -14,8 +14,10 @@ pub async fn delete_challange<'site>(
 ) -> Result<(), ErrorResponse> {
     let store = state.get_storage().await;
 
+    let challenge = challenge.unpluck(&site);
+
     store
-        .delete_challenge(&site, &challenge)
+        .delete_challenge(&challenge)
         .await
         .map_err(|e| match e {
             crate::storage::StorageError::SiteNotFoundError => {

@@ -20,6 +20,9 @@ pub async fn validate_challenges(
     Extension(challenge): Extension<Challenge<'static, ()>>,
     Json(body): Json<RequestBody>
 ) -> Result<String, ErrorResponse> {
+
+    let challenge = challenge.unpluck(&site);
+
     let expected_prefix_count = site.get_prefix_count();
     let prefix_len = body.solutions.len();
 
@@ -51,7 +54,7 @@ pub async fn validate_challenges(
 
     let valid = valid_challenges >= site.get_prefixes_to_solve();
 
-    match state.get_storage().await.delete_challenge(&site, &challenge).await {
+    match state.get_storage().await.delete_challenge(&challenge).await {
         Ok(_) => (),
         Err(_) => {
             info!("Challenge expired or got deleted while we were checking solution");

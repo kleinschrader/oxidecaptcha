@@ -103,15 +103,18 @@ impl Storage for MemoryStorage {
         let site_id = site.get_id();
         let key = (site_id.to_owned(), id.to_owned());
 
-        self.inner.lock().await.challanges.get(&key).cloned()
+        self.inner.lock()
+            .await
+            .challanges
+            .get(&key)
+            .cloned()
     }
 
     async fn store_challenge(
         &self,
-        site: &Site,
-        challenge: &Challenge<'static, ()>,
+        challenge: &Challenge<'_, Site>,
     ) -> Result<(), StorageError> {
-        let site_id = site.get_id();
+        let site_id = challenge.get_site().get_id();
         let challange_id = challenge.get_id();
 
         let mut lock = self.inner.lock().await;
@@ -121,17 +124,17 @@ impl Storage for MemoryStorage {
 
         let key = (site_id.to_owned(), challange_id.to_owned());
 
-        lock.challanges.insert(key, challenge.to_owned());
+        let plucked = challenge.to_owned().pluck();
+        lock.challanges.insert(key, plucked);
 
         Ok(())
     }
 
     async fn delete_challenge(
         &self,
-        site: &Site,
-        challenge: &Challenge<'static, ()>,
+        challenge: &Challenge<'_, Site>,
     ) -> Result<(), StorageError> {
-        let site_id = site.get_id();
+        let site_id = challenge.get_site().get_id();
         let challenge_id = challenge.get_id();
 
         let key = (site_id.to_owned(), challenge_id.to_owned());

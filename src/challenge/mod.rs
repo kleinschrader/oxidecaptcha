@@ -60,6 +60,10 @@ impl<'site> Challenge<'site, Site> {
             site: &(),
         }
     }
+
+    pub fn get_site(&self) -> &Site {
+        self.site
+    }
 }
 
 impl<'site> Challenge<'static, ()> {

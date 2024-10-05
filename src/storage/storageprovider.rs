@@ -4,7 +4,7 @@ use std::time::Duration;
 
 pub use memory::MemoryStorage;
 
-use crate::{challenge::Challenge, config::Config};
+use crate::{challenge::Challenge, config::Config, site::Site};
 
 use super::Storage;
 
@@ -23,7 +23,7 @@ impl Storage for StorageProvider {
     async fn get_challange(
         &self,
         id: &uuid::Uuid,
-        site: &crate::site::Site,
+        site: &Site,
     ) -> Option<Challenge<'static, ()>> {
         match self {
             StorageProvider::Memory(memory_storage) => memory_storage.get_challange(id, site).await,
@@ -32,24 +32,22 @@ impl Storage for StorageProvider {
 
     async fn store_challenge(
         &self,
-        site: &crate::site::Site,
-        challenge: &Challenge<'static, ()>,
+        challenge: &Challenge<'_, Site>,
     ) -> Result<(), super::StorageError> {
         match self {
             StorageProvider::Memory(memory_storage) => {
-                memory_storage.store_challenge(site, challenge).await
+                memory_storage.store_challenge(challenge).await
             }
         }
     }
 
     async fn delete_challenge(
         &self,
-        site: &crate::site::Site,
-        challenge: &Challenge<'static, ()>,
+        challenge: &Challenge<'_, Site>,
     ) -> Result<(), super::StorageError> {
         match self {
             StorageProvider::Memory(memory_storage) => {
-                memory_storage.delete_challenge(site, challenge).await
+                memory_storage.delete_challenge(challenge).await
             }
         }
     }

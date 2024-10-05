@@ -33,13 +33,11 @@ pub trait Storage: Send + Sync {
 
     async fn store_challenge(
         &self,
-        site: &Site,
-        challenge: &Challenge<'static, ()>,
+        challenge: &Challenge<'_, Site>,
     ) -> Result<(), StorageError>;
 
     async fn delete_challenge(
         &self,
-        site: &Site,
-        challenge: &Challenge<'static, ()>,
+        challenge: &Challenge<'_, Site>,
     ) -> Result<(), StorageError>;
 }
