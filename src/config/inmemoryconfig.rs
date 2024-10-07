@@ -1,11 +1,11 @@
+use kale_duration::AbsoluteDuration;
 use serde::Deserialize;
 
 use crate::site::Site;
 
 #[derive(Debug, Deserialize)]
 pub struct HousekeepingConfig {
-    #[serde(rename = "intervalSeconds")]
-    pub interval_seconds: u64,
+    pub interval: AbsoluteDuration,
     #[serde(rename = "batchSize")]
     pub batch_size: usize,
 }

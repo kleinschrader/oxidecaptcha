@@ -68,7 +68,7 @@ impl StorageProvider {
         match config {
             crate::config::StorageTypeConfig::Memory(in_memory_config) => {
                 let house_config = in_memory_config.get_house_keeping();
-                let duration = Duration::from_secs(house_config.interval_seconds);
+                let duration = Duration::from(house_config.interval);
                 StorageProvider::Memory(MemoryStorage::new(
                     in_memory_config.get_sites(),
                     duration,

@@ -6,7 +6,6 @@ use uuid::Uuid;
 use crate::challenge::Challenge;
 
 mod deserialize;
-mod lifetime;
 
 #[derive(Debug, Clone)]
 pub struct Site {

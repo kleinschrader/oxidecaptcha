@@ -1,8 +1,8 @@
-use axum::{extract::State, response::Response};
+use axum::extract::State;
 
 use crate::{error_response::{ErrorId, ErrorResponse}, storage::Storage};
 
-pub async fn health(
+pub async fn _health(
     State(state): State<crate::State>
 ) -> Result<(), ErrorResponse> {
     let storage_healthy = state.get_storage()

@@ -1,11 +1,10 @@
 use std::fmt;
 
+use kale_duration::AbsoluteDuration;
 use serde::{
     de::{self, MapAccess, Visitor},
     Deserialize, Deserializer,
 };
-
-use crate::site::lifetime::Lifetime;
 
 use super::Site;
 
@@ -36,7 +35,7 @@ impl<'de> Deserialize<'de> for Site {
                     type Value = Field;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                        formatter.write_str("`id`, `apiKey`, `prefixes`, `difficulty`, `solutionLength or `liftime`")
+                        formatter.write_str("`id`, `apiKey`, `prefixLength`, `prefixes`, `prefixesToSolve`, `difficulty`, `solutionLength or `liftime`")
                     }
 
                     fn visit_str<E>(self, value: &str) -> Result<Field, E>
@@ -142,12 +141,12 @@ impl<'de> Deserialize<'de> for Site {
                     difficulty.ok_or_else(|| de::Error::missing_field("difficulty"))?;
                 let prefixes = prefixes.ok_or_else(|| de::Error::missing_field("prefixes"))?;
                 let prefix_length =
-                    prefix_length.ok_or_else(|| de::Error::missing_field("prefix_length"))?;
+                    prefix_length.ok_or_else(|| de::Error::missing_field("prefixLength"))?;
                 let prefixes_to_solve =
                     prefixes_to_solve.ok_or_else(|| de::Error::missing_field("prefixesToSolve"))?;
                 let solution_length =
                     solution_length.ok_or_else(|| de::Error::missing_field("solutionLength"))?;
-                let lifetime: Lifetime =
+                let lifetime: AbsoluteDuration =
                     lifetime.ok_or_else(|| de::Error::missing_field("lifetime"))?;
 
                 Ok(Site::new(
