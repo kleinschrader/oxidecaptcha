@@ -89,7 +89,7 @@ impl Site {
 }
 
 impl<'site> Site {
-    pub fn generate_challenge(&'site self) -> Challenge<'site, Site> {
+    pub fn generate_challenge(&'site self) -> Challenge {
         Challenge::generate(self)
     }
 }

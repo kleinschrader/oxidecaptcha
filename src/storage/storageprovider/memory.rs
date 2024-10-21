@@ -22,7 +22,7 @@ pub struct MemoryStorage {
 #[derive(Debug)]
 struct MemoryStorageInner {
     sites: BTreeMap<Uuid, Site>,
-    challanges: IndexMap<(Uuid, Uuid), Challenge<'static, ()>>,
+    challanges: IndexMap<(Uuid, Uuid), Challenge>,
 }
 
 impl MemoryStorage {
@@ -99,7 +99,7 @@ impl Storage for MemoryStorage {
         self.inner.lock().await.sites.get(id).cloned()
     }
 
-    async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge<'static, ()>> {
+    async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge> {
         let site_id = site.get_id();
         let key = (site_id.to_owned(), id.to_owned());
 
@@ -112,9 +112,10 @@ impl Storage for MemoryStorage {
 
     async fn store_challenge(
         &self,
-        challenge: &Challenge<'_, Site>,
+        site: &Site,
+        challenge: &Challenge,
     ) -> Result<(), StorageError> {
-        let site_id = challenge.get_site().get_id();
+        let site_id = site.get_id();
         let challange_id = challenge.get_id();
 
         let mut lock = self.inner.lock().await;
@@ -124,17 +125,17 @@ impl Storage for MemoryStorage {
 
         let key = (site_id.to_owned(), challange_id.to_owned());
 
-        let plucked = challenge.to_owned().pluck();
-        lock.challanges.insert(key, plucked);
+        lock.challanges.insert(key, challenge.to_owned());
 
         Ok(())
     }
 
     async fn delete_challenge(
         &self,
-        challenge: &Challenge<'_, Site>,
+        site: &Site,
+        challenge: &Challenge,
     ) -> Result<(), StorageError> {
-        let site_id = challenge.get_site().get_id();
+        let site_id = site.get_id();
         let challenge_id = challenge.get_id();
 
         let key = (site_id.to_owned(), challenge_id.to_owned());

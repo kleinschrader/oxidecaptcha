@@ -24,7 +24,7 @@ impl Storage for StorageProvider {
         &self,
         id: &uuid::Uuid,
         site: &Site,
-    ) -> Option<Challenge<'static, ()>> {
+    ) -> Option<Challenge> {
         match self {
             StorageProvider::Memory(memory_storage) => memory_storage.get_challange(id, site).await,
         }
@@ -32,22 +32,30 @@ impl Storage for StorageProvider {
 
     async fn store_challenge(
         &self,
-        challenge: &Challenge<'_, Site>,
+        site: &Site,
+        challenge: &Challenge
     ) -> Result<(), super::StorageError> {
         match self {
             StorageProvider::Memory(memory_storage) => {
-                memory_storage.store_challenge(challenge).await
+                memory_storage.store_challenge(
+                    site,
+                    challenge
+                ).await
             }
         }
     }
 
     async fn delete_challenge(
         &self,
-        challenge: &Challenge<'_, Site>,
+        site: &Site,
+        challenge: &Challenge,
     ) -> Result<(), super::StorageError> {
         match self {
             StorageProvider::Memory(memory_storage) => {
-                memory_storage.delete_challenge(challenge).await
+                memory_storage.delete_challenge(
+                    site,
+                    challenge
+                ).await
             }
         }
     }

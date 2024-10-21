@@ -19,7 +19,7 @@ pub async fn get_challange(
     state
         .get_storage()
         .await
-        .store_challenge(&challenge)
+        .store_challenge(&site, &challenge)
         .await
         .map_err(|_| ErrorResponse::new(SiteNotFound, "Site not found"))?;
 

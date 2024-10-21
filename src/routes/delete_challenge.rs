@@ -10,14 +10,12 @@ use crate::{
 pub async fn delete_challange<'site>(
     State(state): State<crate::State>,
     Extension(site): Extension<Site>,
-    Extension(challenge): Extension<Challenge<'static, ()>>,
+    Extension(challenge): Extension<Challenge>,
 ) -> Result<(), ErrorResponse> {
     let store = state.get_storage().await;
 
-    let challenge = challenge.unpluck(&site);
-
     store
-        .delete_challenge(&challenge)
+        .delete_challenge(&site, &challenge)
         .await
         .map_err(|e| match e {
             crate::storage::StorageError::SiteNotFoundError => {

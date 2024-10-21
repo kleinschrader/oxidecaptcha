@@ -29,16 +29,18 @@ impl Error for StorageError {}
 pub trait Storage: Send + Sync {
     async fn get_site(&self, id: &Uuid) -> Option<Site>;
 
-    async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge<'static, ()>>;
+    async fn get_challange(&self, id: &Uuid, site: &Site) -> Option<Challenge>;
 
     async fn store_challenge(
         &self,
-        challenge: &Challenge<'_, Site>,
+        site: &Site,
+        challenge: &Challenge,
     ) -> Result<(), StorageError>;
 
     async fn delete_challenge(
         &self,
-        challenge: &Challenge<'_, Site>,
+        site: &Site,
+        challenge: &Challenge,
     ) -> Result<(), StorageError>;
 
     async fn healthy(&self) -> bool;
