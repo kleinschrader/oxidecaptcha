@@ -1,5 +1,6 @@
 use std::time::{Duration, SystemTime};
 
+use bytes::BufMut;
 use serde::Serialize;
 
 #[derive(Debug, Clone)]
@@ -41,6 +42,11 @@ impl Timestamp {
     pub fn is_expired(&self) -> bool {
         let now = SystemTime::now();
         self.0 < now
+    }
+
+    pub fn write_to_buf(&self, target: &mut impl BufMut) {
+        let num: u64 = self.into();
+        target.put_u64_le(num);
     }
 }
 

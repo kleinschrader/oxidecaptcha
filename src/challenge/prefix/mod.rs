@@ -38,6 +38,14 @@ impl Prefix {
     pub fn _get_bytes(&self) -> &Bytes {
         &self.0
     }
+
+    pub fn write_to_buf(&self, target: &mut impl BufMut) {
+        target.put(self.0.as_ref());
+    }
+
+    pub fn get_size_hint(&self) -> usize {
+        self.0.len()
+    }
 }
 
 #[cfg(test)]
